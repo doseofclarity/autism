@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Autism Spectrum Disorder (ASD) | MCN Review | Pillitteri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .transition-all { transition: all 0.3s ease; }
+        .recall-mode .reveal-text {
+            background-color: #cbd5e1;
+            color: transparent;
+            border-radius: 0.375rem;
+            padding: 0 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            box-shadow: inset 0 0 0 1px #94a3b8;
+        }
+        .recall-mode .reveal-text:hover,
+        .recall-mode .reveal-text.revealed {
+            background-color: #c7d2fe;
+            color: #1e293b;
+            box-shadow: none;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 8px; }
+        .content-section { animation: fade 0.3s ease; }
+        @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .quiz-feedback-correct { background-color: #dcfce7; border-left: 4px solid #22c55e; }
+        .quiz-feedback-wrong { background-color: #fee2e2; border-left: 4px solid #ef4444; }
+        .locked-section { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
+        .flashcard { background: #fff; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: transform 0.2s; cursor: pointer; border: 1px solid #e2e8f0; }
+        .flashcard:hover { transform: translateY(-5px); }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { asd: { light: '#e0e7ff', DEFAULT: '#4f46e5', dark: '#3730a3' } } } }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 h-screen flex flex-col md:flex-row font-sans text-slate-800 overflow-hidden">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-asd-dark text-white p-4 flex justify-between items-center shadow-md z-30 shrink-0">
+        <button onclick="toggleMobileMenu()" class="text-white focus:outline-none z-40">
+            <i class="fa-solid fa-bars text-2xl"></i>
+        </button>
+        <h1 class="font-bold text-lg absolute left-1/2 transform -translate-x-1/2 pointer-events-none">
+            <i class="fa-solid fa-brain mr-2"></i> ASD
+        </h1>
+        <div class="w-8"></div>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar" class="hidden md:flex flex-col w-full md:w-80 bg-white shadow-2xl h-full absolute md:relative z-30 transition-transform duration-300 shrink-0 border-r border-slate-200">
+        <div class="p-6 bg-gradient-to-br from-asd-dark to-asd text-white hidden md:block shrink-0">
+            <h1 class="font-black text-2xl tracking-wide"><i class="fa-regular fa-hand-peace mr-2"></i> Autism Spectrum Disorder</h1>
+            <p class="text-sm text-indigo-200 mt-1 font-medium">MCN · Pillitteri · Early Recognition & Care</p>
+        </div>
+        <div class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1 text-sm font-medium">
+                <li><button onclick="showSection('home')" id="btn-home" class="nav-btn w-full text-left px-6 py-3 bg-asd-light text-asd-dark border-r-4 border-asd-dark transition-colors"><i class="fa-solid fa-house w-6 nav-icon"></i><i class="fa-solid fa-lock w-6 hidden"></i> Home / Start</button></li>
+                <li><button onclick="showSection('definition')" id="btn-definition" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-book-open w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Definition & Epidemiology</button></li>
+                <li><button onclick="showSection('etiology')" id="btn-etiology" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-chart-line w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Etiology & Risk Factors</button></li>
+                <li><button onclick="showSection('clinical')" id="btn-clinical" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-stethoscope w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Clinical Features (DSM‑5 Criteria)</button></li>
+                <li><button onclick="showSection('diagnosis')" id="btn-diagnosis" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-microscope w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Screening & Diagnosis</button></li>
+                <li><button onclick="showSection('management')" id="btn-management" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-capsules w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Management & Therapies</button></li>
+                <li><button onclick="showSection('nursing')" id="btn-nursing" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-user-nurse w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Nursing Care & Family Support</button></li>
+                <li><button onclick="showSection('prognosis')" id="btn-prognosis" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-chart-simple w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Prognosis & Long‑Term Outcomes</button></li>
+                <li><button onclick="showSection('flashcards')" id="btn-flashcards" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-200 mt-2 locked-section"><i class="fa-solid fa-cards w-6 text-asd nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Flashcards & Mnemonics</button></li>
+                <li><button onclick="showSection('final_quiz_sec')" id="btn-final_quiz_sec" class="nav-btn w-full text-left px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-graduation-cap w-6 text-amber-500 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Final 50‑Item Exam</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="flex-1 h-full overflow-y-auto bg-slate-100 relative w-full">
+        <div class="fixed top-16 md:top-4 right-4 md:right-8 z-40 flex items-center bg-white/90 backdrop-blur px-4 py-3 rounded-full shadow-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors" onclick="toggleRecallMode()">
+            <span class="mr-3 text-sm font-bold text-slate-700 hidden md:inline"><i class="fa-solid fa-brain text-asd mr-1"></i> Active Recall</span>
+            <button id="recall-toggle" class="w-12 h-6 bg-slate-300 rounded-full relative transition-colors duration-300 focus:outline-none shadow-inner pointer-events-none">
+                <div id="recall-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow"></div>
+            </button>
+        </div>
+
+        <div class="p-4 md:p-8 max-w-6xl mx-auto pb-32">
+            <!-- HOME SECTION -->
+            <section id="home" class="content-section flex flex-col items-center justify-center min-h-[80vh] text-center block">
+                <div class="bg-gradient-to-br from-slate-800 to-asd-dark text-white rounded-3xl shadow-2xl p-10 md:p-16 w-full relative overflow-hidden">
+                    <div class="absolute top-0 right-0 -mt-10 -mr-10 text-white opacity-5 pointer-events-none"><i class="fa-solid fa-puzzle-piece text-[20rem]"></i></div>
+                    <div class="relative z-10">
+                        <div class="bg-white/10 backdrop-blur-sm inline-block p-4 rounded-full text-indigo-300 mb-6 shadow-sm border border-white/20">
+                            <i class="fa-solid fa-book-open text-5xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-300 mb-2 uppercase tracking-widest">Maternal & Child Health Nursing</h3>
+                        <h1 class="text-4xl md:text-6xl font-black text-white mb-6 leading-tight drop-shadow-md">Autism Spectrum Disorder</h1>
+                        <div class="bg-white/10 backdrop-blur inline-block px-6 py-3 rounded-full mb-10 border border-white/20">
+                            <p class="text-lg text-white font-medium">DSM‑5 Criteria · Early Signs · Nursing Care | <strong>Adele Pillitteri, 7e</strong></p>
+                        </div>
+                        <button onclick="unlockFirstSection()" class="bg-slate-600 hover:bg-slate-500 text-white font-black py-4 px-10 rounded-full shadow-xl transition-transform hover:scale-105 text-lg flex items-center mx-auto focus:outline-none">
+                            Begin Module <i class="fa-solid fa-arrow-right ml-3"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 1. DEFINITION & EPIDEMIOLOGY -->
+            <section id="definition" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-asd pb-3"><i class="fa-solid fa-book-open text-asd mr-4"></i> Definition & Epidemiology</h2>
+                    <p><strong>Autism Spectrum Disorder (ASD)</strong> is a neurodevelopmental disorder characterized by persistent deficits in social communication/interaction and restricted, repetitive patterns of behavior, interests, or activities. Symptoms present in early childhood and limit daily functioning.</p>
+                    <div class="grid md:grid-cols-2 gap-5 mt-4">
+                        <div class="bg-slate-50 p-4 rounded-xl"><strong>📊 Global incidence</strong><br><span class="reveal-text">~1 in 36 children (CDC, 2023). More common in boys (4:1 ratio). In the Philippines, prevalence estimated 1 in 100–150, with increasing recognition.</span></div>
+                        <div class="bg-slate-50 p-4 rounded-xl"><strong>🧠 Key concept</strong><br><span class="reveal-text">ASD is a “spectrum” – wide variation in abilities and needs. No two individuals are alike.</span></div>
+                    </div>
+                    <canvas id="asdChart" width="400" height="200" style="max-width:100%; margin-top:1rem;"></canvas>
+                    <div class="bg-amber-50 p-3 rounded-lg mt-4"><strong>⚠️ Early identification is critical:</strong> <span class="reveal-text">Early intervention improves outcomes.</span></div>
+                    <button onclick="openQuiz('definition')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- 2. ETIOLOGY & RISK FACTORS -->
+            <section id="etiology" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-asd pb-3"><i class="fa-solid fa-chart-line text-asd mr-4"></i> Etiology & Risk Factors</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div class="bg-red-50 p-4 rounded-xl"><strong>⚠️ Risk Factors</strong><br><span class="reveal-text">• Advanced parental age<br>• Prematurity / low birth weight<br>• Genetic syndromes (Fragile X, tuberous sclerosis, Rett)<br>• Family history of ASD<br>• Prenatal exposure to valproate, alcohol<br>• Maternal obesity/diabetes</span></div>
+                        <div class="bg-blue-50 p-4 rounded-xl"><strong>🧬 Etiology</strong><br><span class="reveal-text">Strong genetic component (heritability ~80%). Multiple genes involved; no single cause. Environmental factors may interact with genetic predisposition. Vaccines DO NOT cause ASD (extensive evidence).</span></div>
+                    </div>
+                    <div class="bg-yellow-50 p-3 rounded-lg mt-4"><strong>📌 Myth vs Fact:</strong> <span class="reveal-text">Thimerosal (vaccine preservative) does NOT cause autism. Numerous studies have refuted the link.</span></div>
+                    <button onclick="openQuiz('etiology')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- 3. CLINICAL FEATURES (DSM‑5) -->
+            <section id="clinical" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-asd pb-3"><i class="fa-solid fa-stethoscope text-asd mr-4"></i> Clinical Features (DSM‑5 Criteria)</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div class="bg-indigo-50 p-4 rounded-xl"><strong>A. Social Communication deficits</strong><br><span class="reveal-text">• Poor eye contact, lack of joint attention<br>• Delayed or absent language<br>• Difficulty with back‑and‑forth conversation<br>• Reduced sharing of emotions/interests<br>• Difficulty understanding social cues</span></div>
+                        <div class="bg-indigo-50 p-4 rounded-xl"><strong>B. Restricted, repetitive behaviors</strong><br><span class="reveal-text">• Stereotyped movements (hand flapping, rocking)<br>• Insistence on sameness, rigidity<br>• Intense fixated interests (e.g., trains, numbers)<br>• Hyper‑ or hyporeactivity to sensory input</span></div>
+                    </div>
+                    <div class="bg-green-50 p-3 rounded-lg mt-4"><i class="fa-regular fa-clock"></i> <strong>Early red flags (M‑CHAT):</strong> <span class="reveal-text">No babbling by 12 months, no gestures by 12 months, no single words by 16 months, loss of language/skills at any age.</span></div>
+                    <button onclick="openQuiz('clinical')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- 4. SCREENING & DIAGNOSIS -->
+            <section id="diagnosis" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-asd pb-3"><i class="fa-solid fa-microscope text-asd mr-4"></i> Screening & Diagnosis</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Screening tools:</strong> <span class="reveal-text">M‑CHAT (Modified Checklist for Autism in Toddlers) at 18 and 24 months. Positive screen → further evaluation.</span></li>
+                        <li><strong>Comprehensive diagnostic evaluation:</strong> <span class="reveal-text">Developmental pediatrician, child psychologist, or child psychiatrist. ADOS‑2 (Autism Diagnostic Observation Schedule) is gold standard.</span></li>
+                        <li><strong>Multidisciplinary team:</strong> <span class="reveal-text">Speech therapy, occupational therapy, psychology, neurology.</span></li>
+                        <li><strong>Rule out other conditions:</strong> <span class="reveal-text">Hearing test, lead screening, genetic testing (Fragile X, microarray).</span></li>
+                    </ul>
+                    <div class="bg-amber-50 p-3 rounded-lg mt-4"><i class="fa-regular fa-lightbulb"></i> <strong>Nursing role:</strong> <span class="reveal-text">Administer M‑CHAT, educate parents about milestones, refer for early intervention if concerns arise.</span></div>
+                    <button onclick="openQuiz('diagnosis')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- 5. MANAGEMENT & THERAPIES -->
+            <section id="management" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-asd pb-3"><i class="fa-solid fa-capsules text-asd mr-4"></i> Management & Therapies</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div><strong>🧩 Behavioral & Educational</strong><br><span class="reveal-text">• Applied Behavior Analysis (ABA) – evidence‑based<br>• Speech‑language therapy<br>• Occupational therapy (sensory integration)<br>• Social skills training<br>• Individualized Education Program (IEP)</span></div>
+                        <div><strong>💊 Medications (for co‑occurring symptoms)</strong><br><span class="reveal-text">• Risperidone, aripiprazole – for irritability/aggression<br>• SSRIs – for anxiety, repetitive behaviors<br>• Stimulants – for ADHD symptoms<br>• Melatonin – for sleep disturbances</span></div>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-lg mt-4"><i class="fa-regular fa-hospital"></i> <strong>Early Intensive Behavioral Intervention (EIBI):</strong> <span class="reveal-text">Starting before age 3 improves IQ, language, adaptive skills.</span></div>
+                    <button onclick="openQuiz('management')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- 6. NURSING CARE & FAMILY SUPPORT -->
+            <section id="nursing" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-asd pb-3"><i class="fa-solid fa-user-nurse text-asd mr-4"></i> Nursing Care & Family Support</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Support parents:</strong> <span class="reveal-text">Provide resources (support groups, respite care). Acknowledge parental stress and grief. Encourage self‑care.</span></li>
+                        <li><strong>Communication strategies:</strong> <span class="reveal-text">Use simple, concrete language; visual schedules; picture exchange communication system (PECS); allow extra response time.</span></li>
+                        <li><strong>Sensory considerations:</strong> <span class="reveal-text">Reduce environmental stimuli (dim lights, quiet area); provide fidget toys, weighted blankets; respect sensory aversions.</span></li>
+                        <li><strong>Sibling support:</strong> <span class="reveal-text">Explain autism, address feelings of jealousy or embarrassment.</span></li>
+                        <li><strong>Transition planning:</strong> <span class="reveal-text">Prepare for school changes, adolescence, adulthood (vocational training, independent living).</span></li>
+                    </ul>
+                    <div class="bg-pink-50 p-3 rounded-lg mt-4"><i class="fa-regular fa-heart"></i> <strong>Mnemonic “C.A.R.E.”</strong> – Communication strategies, Adjust environment, Respect routines, Empathize with family.</div>
+                    <button onclick="openQuiz('nursing')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- 7. PROGNOSIS & LONG‑TERM OUTCOMES -->
+            <section id="prognosis" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-asd pb-3"><i class="fa-solid fa-chart-simple text-asd mr-4"></i> Prognosis & Long‑Term Outcomes</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Early intensive intervention</strong> significantly improves language, social skills, and adaptive functioning.</li>
+                        <li>Some individuals become independent, others require lifelong support.</li>
+                        <li>Associated conditions: intellectual disability (30‑50%), epilepsy (10‑30%), anxiety, depression, ADHD, GI issues.</li>
+                        <li>Many adults with ASD can work and live semi‑independently with supports.</li>
+                    </ul>
+                    <div class="bg-green-50 p-3 rounded-lg mt-4"><strong>🌟 Positive outlook:</strong> <span class="reveal-text">With appropriate support, individuals with ASD can lead fulfilling lives and contribute to society.</span></div>
+                    <button onclick="openQuiz('prognosis')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Next</button>
+                </div>
+            </section>
+
+            <!-- 8. FLASHCARDS & MNEMONICS -->
+            <section id="flashcards" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-4 border-b-2 border-asd pb-3"><i class="fa-solid fa-cards text-asd mr-4"></i> Flashcards & Mnemonics</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-asd">Q: What does ASD stand for?</div><div class="flash-answer hidden mt-2">Autism Spectrum Disorder</div></div>
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-asd">Q: Two core domains of DSM‑5 criteria?</div><div class="flash-answer hidden mt-2">Social communication deficits; Restricted/repetitive behaviors</div></div>
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-asd">Q: Screening tool recommended at 18 & 24 months?</div><div class="flash-answer hidden mt-2">M‑CHAT (Modified Checklist for Autism in Toddlers)</div></div>
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-asd">Q: What is the gold standard diagnostic instrument?</div><div class="flash-answer hidden mt-2">ADOS‑2 (Autism Diagnostic Observation Schedule)</div></div>
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-asd">Q: Which medication is FDA‑approved for irritability in ASD?</div><div class="flash-answer hidden mt-2">Risperidone and Aripiprazole</div></div>
+                        <div class="flashcard p-4" onclick="toggleFlash(this)"><div class="font-bold text-asd">Q: Is there a cure for ASD?</div><div class="flash-answer hidden mt-2">No, but early intervention improves outcomes</div></div>
+                    </div>
+                    <div class="mt-6 bg-indigo-50 p-4 rounded-xl"><strong>🧠 Mnemonics</strong><br><span class="reveal-text">“A.R.I.S.E.” – Attention (poor eye contact), Restricted interests, Insistence on sameness, Social deficits, Echolalia.<br>“M.C.H.A.T.” – Modified Checklist for Autism in Toddlers.<br>“C.A.R.E.” – Communication strategies, Adjust environment, Respect routines, Empathize.</span></div>
+                    <button onclick="openQuiz('flashcards')" class="mt-6 w-full bg-slate-800 text-white font-black py-3 rounded-xl">Take Quiz → Unlock Final Exam</button>
+                </div>
+            </section>
+
+            <!-- FINAL EXAM SECTION -->
+            <section id="final_quiz_sec" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 text-center min-h-[60vh] flex flex-col justify-center items-center">
+                    <i class="fa-solid fa-graduation-cap text-8xl text-amber-500 mb-6"></i>
+                    <h2 class="text-4xl font-black text-slate-800 mb-4">Final 50‑Item Exam: Autism Spectrum Disorder</h2>
+                    <p class="text-lg text-slate-600 mb-8 max-w-2xl">Covers definition, epidemiology, etiology, clinical features, screening, diagnosis, management, nursing care, and mnemonics. Score ≥75% to pass.</p>
+                    <button onclick="openQuiz('final_quiz')" class="w-full max-w-md bg-slate-800 text-white font-black py-4 rounded-xl shadow-md text-xl">Start Final Exam</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- QUIZ MODAL -->
+    <div id="quiz-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl p-6 md:p-8 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeQuiz()" class="absolute top-4 right-4 text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <h2 id="quiz-title" class="text-3xl font-black text-slate-800 mb-2"></h2>
+            <div id="quiz-questions-container" class="space-y-4 mt-4"></div>
+            <button id="quiz-submit-btn" onclick="submitQuiz()" class="mt-8 w-full bg-asd text-white font-bold py-4 rounded-xl shadow-lg">Submit Answers</button>
+            <div id="quiz-result-container" class="hidden mt-6 p-4 rounded-xl bg-slate-100"></div>
+        </div>
+    </div>
+
+    <script>
+        let unlockedSections = ['home'];
+        // QUIZZES (10 questions each)
+        const quizzes = {
+            definition: { title: "Definition & Epidemiology", next: "etiology", questions: [
+                { q: "ASD is a:", options: ["Neurodevelopmental disorder", "Mood disorder", "Anxiety disorder", "Psychotic disorder"], ans: 0 },
+                { q: "Current estimated prevalence in the US (CDC) is about:", options: ["1 in 100", "1 in 36", "1 in 500", "1 in 1000"], ans: 1 },
+                { q: "ASD is more common in:", options: ["Boys (4:1)", "Girls (2:1)", "Equal", "Adults"], ans: 0 },
+                { q: "ASD is called a 'spectrum' because:", options: ["Wide variation in abilities and needs", "It only affects one organ", "It has one symptom", "It is contagious"], ans: 0 },
+                { q: "The DSM‑5 criteria require symptoms to be present in:", options: ["Early childhood", "Adolescence", "Adulthood", "Only after trauma"], ans: 0 },
+                { q: "Which of the following is NOT a core domain of ASD?", options: ["Social communication deficits", "Restricted/repetitive behaviors", "Hallucinations", "Sensory abnormalities"], ans: 2 },
+                { q: "ASD is primarily a(n):", options: ["Inherited/genetic condition", "Infectious disease", "Result of poor parenting", "Vaccine injury"], ans: 0 },
+                { q: "The male‑to‑female ratio in ASD is approximately:", options: ["1:1", "2:1", "4:1", "10:1"], ans: 2 },
+                { q: "In the Philippines, awareness of ASD has:", options: ["Increased with more screening", "Decreased", "Remained same", "None"], ans: 0 },
+                { q: "Which of the following is NOT a risk factor for ASD?", options: ["Advanced paternal age", "Maternal obesity", "Maternal influenza vaccine", "Prematurity"], ans: 2 }
+            ]},
+            etiology: { title: "Etiology & Risk Factors", next: "clinical", questions: [
+                { q: "The heritability of ASD is estimated at approximately:", options: ["30%", "50%", "80%", "100%"], ans: 2 },
+                { q: "Which genetic syndrome is strongly associated with ASD?", options: ["Down syndrome", "Fragile X syndrome", "Turner syndrome", "Klinefelter syndrome"], ans: 1 },
+                { q: "Which prenatal medication is associated with increased ASD risk?", options: ["Acetaminophen", "Valproate", "Penicillin", "Insulin"], ans: 1 },
+                { q: "Maternal condition linked to higher ASD risk:", options: ["Gestational diabetes", "Obesity", "Both A and B", "None"], ans: 2 },
+                { q: "Vaccines have been shown to cause autism. This statement is:", options: ["True", "False (extensive evidence refutes link)", "Partially true", "Unknown"], ans: 1 },
+                { q: "Advanced paternal age is a risk factor because:", options: ["Increased de novo mutations", "Older fathers have less energy", "Maternal age only matters", "No evidence"], ans: 0 },
+                { q: "Which of the following is NOT a risk factor for ASD?", options: ["Prematurity", "Low birth weight", "Full term, normal weight", "Birth asphyxia"], ans: 2 },
+                { q: "Environmental factors interact with:", options: ["Genetic predisposition", "Only nutrition", "Only parenting", "None"], ans: 0 },
+                { q: "Which of the following is NOT associated with ASD?", options: ["Tuberous sclerosis", "Rett syndrome (in females)", "Cystic fibrosis", "Fragile X"], ans: 2 },
+                { q: "The increased prevalence of ASD is largely due to:", options: ["Better detection and broader criteria", "True epidemic", "Vaccines", "Toxins only"], ans: 0 }
+            ]},
+            clinical: { title: "Clinical Features (DSM‑5)", next: "diagnosis", questions: [
+                { q: "A child who avoids eye contact and does not respond to name may have:", options: ["Normal development", "ASD (social communication deficit)", "Hearing loss only", "Speech delay only"], ans: 1 },
+                { q: "Repetitive hand flapping or rocking is an example of:", options: ["Social deficit", "Restricted/repetitive behavior", "Language delay", "Cognitive impairment"], ans: 1 },
+                { q: "A child who lines up toys obsessively and becomes distressed if order is changed is showing:", options: ["Typical play", "Insistence on sameness (RRB)", "Social communication", "Intellectual disability"], ans: 1 },
+                { q: "Which of the following is an early red flag for ASD?", options: ["Babbling by 6 months", "Loss of language after 18 months", "Pointing at 12 months", "Saying 'mama' by 12 months"], ans: 1 },
+                { q: "Joint attention refers to:", options: ["Sharing focus on an object with another person", "Eye contact only", "Sitting together", "Parallel play"], ans: 0 },
+                { q: "Echolalia in ASD means:", options: ["Repeating words or phrases", "Loss of speech", "Advanced vocabulary", "Whispering"], ans: 0 },
+                { q: "A child who covers ears in response to vacuum cleaner may have:", options: ["Hypersensitivity to sensory input", "Normal hearing", "Conduct disorder", "ADHD"], ans: 0 },
+                { q: "Which of the following is NOT a social communication deficit in ASD?", options: ["Poor eye contact", "Lack of pretend play", "Good back‑and‑forth conversation", "Reduced sharing of emotions"], ans: 2 },
+                { q: "A child who is extremely attached to a specific toy and refuses to play with others is showing:", options: ["Restricted interest", "Social anxiety", "Depression", "Normal"], ans: 0 },
+                { q: "The DSM‑5 requires that symptoms cause:", options: ["Clinically significant impairment", "No impairment", "Only mild difficulty", "Only in school"], ans: 0 }
+            ]},
+            diagnosis: { title: "Screening & Diagnosis", next: "management", questions: [
+                { q: "The M‑CHAT is recommended at:", options: ["6 and 12 months", "12 and 18 months", "18 and 24 months", "3 and 5 years"], ans: 2 },
+                { q: "A positive M‑CHAT screen should lead to:", options: ["Immediate diagnosis", "Further evaluation by specialist", "Reassurance only", "Observation for 1 year"], ans: 1 },
+                { q: "The gold standard diagnostic instrument for ASD is:", options: ["M‑CHAT", "ADOS‑2", "CBCL", "Vineland"], ans: 1 },
+                { q: "A comprehensive diagnostic evaluation should include:", options: ["Hearing test, genetic testing, developmental assessment", "Only observation", "Only parent interview", "Blood count"], ans: 0 },
+                { q: "Which professional typically diagnoses ASD?", options: ["Developmental pediatrician", "Child psychiatrist", "Psychologist trained in ADOS", "All of the above"], ans: 3 },
+                { q: "Routine screening for ASD is recommended because:", options: ["Early intervention improves outcomes", "It is cheap", "It is mandatory", "All children have ASD"], ans: 0 },
+                { q: "Before diagnosing ASD, it is important to rule out:", options: ["Hearing loss", "Lead poisoning", "Genetic syndromes", "All of the above"], ans: 3 },
+                { q: "A child with ASD should be referred for early intervention as soon as:", options: ["Suspicion arises", "After formal diagnosis", "After age 5", "Never"], ans: 0 },
+                { q: "The M‑CHAT is a:", options: ["Parent‑report questionnaire", "Direct observation test", "Blood test", "MRI"], ans: 0 },
+                { q: "Which of the following is NOT a component of ASD diagnostic evaluation?", options: ["Cognitive assessment", "Adaptive behavior assessment", "Complete blood count", "Speech/language evaluation"], ans: 2 }
+            ]},
+            management: { title: "Management & Therapies", next: "nursing", questions: [
+                { q: "The most evidence‑based behavioral therapy for ASD is:", options: ["ABA (Applied Behavior Analysis)", "CBT", "Play therapy", "Art therapy"], ans: 0 },
+                { q: "Early intensive behavioral intervention is most effective when started:", options: ["Before age 3", "After age 5", "During adolescence", "Adulthood"], ans: 0 },
+                { q: "Which medication is FDA‑approved for irritability in ASD?", options: ["Risperidone", "Fluoxetine", "Methylphenidate", "Clonidine"], ans: 0 },
+                { q: "A child with ASD and severe anxiety may benefit from:", options: ["SSRI (e.g., fluoxetine)", "Antipsychotic", "Stimulant", "Anticonvulsant"], ans: 0 },
+                { q: "Speech therapy for ASD aims to improve:", options: ["Communication, pragmatic language", "Only articulation", "Only fluency", "Only voice"], ans: 0 },
+                { q: "Occupational therapy for ASD often addresses:", options: ["Sensory integration, daily living skills", "Gross motor only", "Fine motor only", "Social skills only"], ans: 0 },
+                { q: "An Individualized Education Program (IEP) is:", options: ["A legal document for school accommodations", "A medical treatment", "A therapy schedule", "A medication plan"], ans: 0 },
+                { q: "Melatonin is commonly used in ASD to treat:", options: ["Sleep disturbances", "Aggression", "Repetitive behaviors", "Seizures"], ans: 0 },
+                { q: "Aripiprazole is used for:", options: ["Irritability and aggression in ASD", "Core social deficits", "Language delay", "Sensory issues"], ans: 0 },
+                { q: "Which of the following is NOT a recommended therapy for ASD core symptoms?", options: ["ABA", "Chelation therapy (dangerous, ineffective)", "Speech therapy", "Social skills groups"], ans: 1 }
+            ]},
+            nursing: { title: "Nursing Care & Family Support", next: "prognosis", questions: [
+                { q: "When communicating with a child with ASD, the nurse should:", options: ["Use simple, concrete language; visual aids", "Speak very loudly", "Use complex sentences", "Avoid eye contact"], ans: 0 },
+                { q: "A child with ASD becomes agitated by bright lights and loud noises. The nurse should:", options: ["Reduce environmental stimuli", "Increase stimuli to desensitize", "Ignore the behavior", "Restrain the child"], ans: 0 },
+                { q: "Parents of a newly diagnosed child may experience:", options: ["Grief, guilt, stress", "Only joy", "No emotion", "Anger only"], ans: 0 },
+                { q: "The mnemonic 'C.A.R.E.' stands for:", options: ["Communication, Adjust environment, Respect routines, Empathize", "Counsel, Assess, Refer, Educate", "Cry, Agitate, Reject, Escape", "None"], ans: 0 },
+                { q: "To help a child with ASD transition between activities, the nurse should:", options: ["Use visual schedules and countdowns", "Abruptly change activity", "Punish resistance", "Ignore"], ans: 0 },
+                { q: "Siblings of a child with ASD may need:", options: ["Explanation and support, time with parents", "No support", "To be separated", "Only discipline"], ans: 0 },
+                { q: "Which of the following is a nursing priority for a child with ASD in hospital?", options: ["Maintain routine, minimize sensory overload", "Force eye contact", "Change schedule frequently", "Use long sentences"], ans: 0 },
+                { q: "A child with ASD and pica (eating non‑food items) requires:", options: ["Safety precautions, close supervision", "No intervention", "Punishment", "Diet only"], ans: 0 },
+                { q: "When a child with ASD has a meltdown, the nurse should:", options: ["Ensure safety, reduce stimulation, stay calm", "Restrain firmly", "Shout", "Ignore"], ans: 0 },
+                { q: "Parental self‑care is important because:", options: ["Parental stress affects care quality", "It is selfish", "Only child matters", "None"], ans: 0 }
+            ]},
+            prognosis: { title: "Prognosis & Long‑Term Outcomes", next: "flashcards", questions: [
+                { q: "Early intensive intervention is associated with:", options: ["Better language and adaptive outcomes", "Worse outcomes", "No difference", "Cure"], ans: 0 },
+                { q: "Approximately what percentage of individuals with ASD have intellectual disability?", options: ["10%", "30-50%", "80%", "100%"], ans: 1 },
+                { q: "Which co‑occurring condition is common in ASD?", options: ["Epilepsy", "Anxiety", "ADHD", "All of the above"], ans: 3 },
+                { q: "Many adults with ASD can:", options: ["Live semi‑independently with supports", "Never work", "Only stay at home", "Be cured"], ans: 0 },
+                { q: "Which of the following influences prognosis in ASD?", options: ["IQ level, language ability, early intervention", "Only IQ", "Only intervention", "No factors"], ans: 0 },
+                { q: "Life expectancy in ASD is:", options: ["Slightly reduced due to associated conditions", "Normal", "Greatly increased", "Unknown"], ans: 0 },
+                { q: "Children with ASD who have verbal skills by age 5 tend to have:", options: ["Better outcomes", "Worse outcomes", "No difference", "More regression"], ans: 0 },
+                { q: "Employment rates for adults with ASD are:", options: ["Low but can improve with support", "Very high", "Equal to general population", "100%"], ans: 0 },
+                { q: "Seizures in ASD are most common in individuals with:", options: ["Intellectual disability", "High IQ", "No language delay", "Girls"], ans: 0 },
+                { q: "With appropriate support, individuals with ASD can:", options: ["Lead fulfilling lives", "Never function independently", "All have severe disability", "None"], ans: 0 }
+            ]},
+            flashcards: { title: "Flashcards & Mnemonics", next: "final_quiz_sec", questions: [
+                { q: "The mnemonic for early red flags of ASD is:", options: ["M‑CHAT", "A.R.I.S.E.", "C.A.R.E.", "A.B.A."], ans: 0 },
+                { q: "In 'A.R.I.S.E.', 'S' stands for:", options: ["Social deficits", "Sensory", "School", "Sleep"], ans: 0 },
+                { q: "The mnemonic for nursing care is:", options: ["C.A.R.E.", "A.R.I.S.E.", "M.C.H.A.T.", "A.B.A."], ans: 0 },
+                { q: "In 'C.A.R.E.', 'R' stands for:", options: ["Respect routines", "Resuscitate", "Restrain", "Record"], ans: 0 },
+                { q: "The screening tool mnemonic is:", options: ["M‑CHAT", "A.R.I.S.E.", "C.A.R.E.", "A.B.A."], ans: 0 },
+                { q: "M‑CHAT stands for:", options: ["Modified Checklist for Autism in Toddlers", "Mental Health Autism Test", "Maternal Child Health Autism Tool", "None"], ans: 0 },
+                { q: "The mnemonic for medications used in ASD for irritability is:", options: ["Risperidone, Aripiprazole", "SSRIs", "Stimulants", "Anticonvulsants"], ans: 0 },
+                { q: "A flashcard for 'gold standard diagnostic test' answer is:", options: ["ADOS‑2", "M‑CHAT", "CBC", "MRI"], ans: 0 },
+                { q: "The mnemonic for early intervention is:", options: ["EIBI (Early Intensive Behavioral Intervention)", "CBT", "ECT", "IVIG"], ans: 0 },
+                { q: "A flashcard for 'ABA' answer is:", options: ["Applied Behavior Analysis (evidence‑based therapy)", "American Board of Autism", "Atypical Behavior Assessment", "None"], ans: 0 }
+            ]}
+        };
+        // Build final 50-item exam
+        let finalQ = [];
+        for(let sec of ['definition','etiology','clinical','diagnosis','management','nursing','prognosis','flashcards']) {
+            finalQ.push(...quizzes[sec].questions.slice(0,6));
+        }
+        while(finalQ.length < 50) finalQ.push({ q: "The most important factor for improving outcomes in ASD is:", options: ["Early diagnosis and intensive intervention", "Medication only", "Waiting until school age", "Dietary supplements"], ans: 0 });
+        quizzes.final_quiz = { title: "Final 50‑Item Exam: Autism Spectrum Disorder", next: null, questions: finalQ };
+
+        let currentQuiz = null;
+        let asdChart = null;
+
+        function initAsdChart() {
+            const ctx = document.getElementById('asdChart')?.getContext('2d');
+            if(ctx && !asdChart) {
+                asdChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['2000', '2010', '2020', '2023 (CDC)'],
+                        datasets: [{ label: 'Prevalence (per 1000)', data: [6.7, 11.3, 18.5, 27.6], backgroundColor: '#4f46e5', borderRadius: 6 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } } }
+                });
+            }
+        }
+
+        function toggleFlash(el) { const ans = el.querySelector('.flash-answer'); if(ans) ans.classList.toggle('hidden'); }
+        function unlockFirstSection() { if(!unlockedSections.includes('definition')) { unlockedSections.push('definition'); updateSidebarUI(); } showSection('definition'); }
+        function showSection(sectionId) {
+            if (!unlockedSections.includes(sectionId) && sectionId !== 'home') { alert("Complete the Active Recall Quiz at the bottom of the previous section to unlock."); return; }
+            document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(sectionId)?.classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-asd-light','text-asd-dark','border-r-4','border-asd-dark'));
+            const activeBtn = document.getElementById('btn-'+sectionId);
+            if(activeBtn) activeBtn.classList.add('bg-asd-light','text-asd-dark','border-r-4','border-asd-dark');
+            if(window.innerWidth < 768) document.getElementById('sidebar').classList.add('hidden');
+            if(sectionId === 'definition') setTimeout(initAsdChart, 50);
+        }
+        function updateSidebarUI() {
+            const sections = ['home','definition','etiology','clinical','diagnosis','management','nursing','prognosis','flashcards','final_quiz_sec'];
+            sections.forEach(sec => {
+                const btn = document.getElementById('btn-'+sec);
+                if(!btn) return;
+                const lock = btn.querySelector('.fa-lock'), icon = btn.querySelector('.nav-icon');
+                if(unlockedSections.includes(sec) || sec==='home') { btn.classList.remove('locked-section'); if(lock) lock.classList.add('hidden'); if(icon) icon.classList.remove('hidden'); }
+                else { btn.classList.add('locked-section'); if(lock) lock.classList.remove('hidden'); if(icon) icon.classList.add('hidden'); }
+            });
+        }
+        function openQuiz(sectionId) { currentQuiz = sectionId; const qd = quizzes[sectionId]; if(!qd) return; document.getElementById('quiz-title').innerHTML = qd.title; const container = document.getElementById('quiz-questions-container'); container.innerHTML = ''; qd.questions.forEach((q, idx) => { let html = `<div class="bg-slate-50 p-4 rounded-xl mb-4"><p class="font-bold mb-3">${idx+1}. ${q.q}</p><div class="space-y-2">`; q.options.forEach((opt,oi) => { html += `<label class="flex items-center space-x-3 p-2 rounded-lg hover:bg-white cursor-pointer"><input type="radio" name="q${idx}" value="${oi}" class="form-radio text-asd"><span>${opt}</span></label>`; }); html += `</div><div class="feedback-${idx} text-sm mt-2 hidden"></div></div>`; container.innerHTML += html; }); document.getElementById('quiz-submit-btn').classList.remove('hidden'); document.getElementById('quiz-result-container').classList.add('hidden'); document.getElementById('quiz-modal').classList.remove('hidden'); }
+        function closeQuiz() { document.getElementById('quiz-modal').classList.add('hidden'); }
+        function submitQuiz() {
+            const qd = quizzes[currentQuiz];
+            if(!qd) return;
+            let score = 0;
+            for(let i=0; i<qd.questions.length; i++) {
+                const sel = document.querySelector(`input[name="q${i}"]:checked`);
+                if(sel && parseInt(sel.value)===qd.questions[i].ans) score++;
+                const fbDiv = document.querySelector(`.feedback-${i}`);
+                if(fbDiv){
+                    fbDiv.classList.remove('hidden');
+                    const correctTxt = qd.questions[i].options[qd.questions[i].ans];
+                    if(sel && parseInt(sel.value)===qd.questions[i].ans) { fbDiv.innerHTML='<span class="text-green-700">✓ Correct</span>'; fbDiv.parentElement?.classList.add('quiz-feedback-correct'); }
+                    else { const selectedTxt = sel? qd.questions[i].options[parseInt(sel.value)]:"No answer"; fbDiv.innerHTML=`<span class="text-red-700">✗ Incorrect. Correct: ${correctTxt}. You answered: ${selectedTxt}</span>`; fbDiv.parentElement?.classList.add('quiz-feedback-wrong'); }
+                }
+            }
+            let percent = (score/qd.questions.length)*100;
+            let resultDiv = document.getElementById('quiz-result-container');
+            document.getElementById('quiz-submit-btn').classList.add('hidden');
+            resultDiv.classList.remove('hidden');
+            if(percent>=75){
+                if(currentQuiz==='final_quiz'){ resultDiv.innerHTML=`<div class="text-green-600 text-4xl text-center">🎉 Excellent! Score ${score}/${qd.questions.length} (${percent}%)<br>You mastered ASD</div><button onclick="closeQuiz()" class="mt-4 bg-asd text-white px-6 py-2 rounded-xl">Close</button>`; return; }
+                if(quizzes[currentQuiz].next && !unlockedSections.includes(quizzes[currentQuiz].next)) unlockedSections.push(quizzes[currentQuiz].next);
+                if(quizzes[currentQuiz].next === 'flashcards' && !unlockedSections.includes('final_quiz_sec')) unlockedSections.push('final_quiz_sec');
+                updateSidebarUI();
+                resultDiv.innerHTML=`<div class="text-green-600 text-3xl text-center">✅ Passed! (${score}/${qd.questions.length})</div><button onclick="closeQuiz(); showSection('${quizzes[currentQuiz].next}')" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-xl">Unlock Next Section</button>`;
+            } else { resultDiv.innerHTML=`<div class="text-red-600 text-3xl text-center">❌ Failed: ${score}/${qd.questions.length} (${percent}%)<br>Need 75%</div><button onclick="openQuiz('${currentQuiz}')" class="mt-4 bg-slate-600 text-white px-6 py-2 rounded-xl">Try Again</button>`; }
+        }
+        function toggleRecallMode() { const active = !document.body.classList.contains('recall-mode'); const toggle=document.getElementById('recall-toggle'),knob=document.getElementById('recall-knob'); if(active){ document.body.classList.add('recall-mode'); toggle.classList.add('bg-asd-dark'); knob.classList.add('translate-x-6'); } else { document.body.classList.remove('recall-mode'); toggle.classList.remove('bg-asd-dark'); knob.classList.remove('translate-x-6'); } }
+        function toggleMobileMenu() { const s=document.getElementById('sidebar'); if(s.classList.contains('hidden')) s.classList.remove('hidden','flex','absolute','h-full','z-50'); else s.classList.add('hidden'); }
+        document.addEventListener('DOMContentLoaded', () => { updateSidebarUI(); document.querySelectorAll('.reveal-text').forEach(el => el.addEventListener('click', function(){ if(document.body.classList.contains('recall-mode')) this.classList.toggle('revealed'); })); });
+    </script>
+</body>
+</html>
